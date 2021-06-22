@@ -1,0 +1,47 @@
+{
+  "type": "record",
+  "name": "MessageHeader",
+  "namespace": "ai.kata.kafka",
+  "fields": [
+    {
+      "name": "valueSubject",
+      "type": "string"
+    },
+    {
+      "name": "messageId",
+      "type": "string"
+    },
+    {
+      "name": "correlationId",
+      "type": "string"
+    },
+    {
+      "name": "conversationId",
+      "type": "string"
+    },
+    {
+      "name": "replyTopic",
+      "type": [
+        "null",
+        "string"
+      ],
+      "default": null
+    },
+    {
+      "name": "originService",
+      "type": "string"
+    },
+    {
+      "name": "originHostname",
+      "type": "string"
+    },
+    {
+      "name": "messageBusVersion",
+      "type": "string"
+    },
+    {
+      "name": "timestamp",
+      "type": "long"
+    }
+  ]
+}
