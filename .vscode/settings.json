@@ -1,0 +1,5 @@
+{
+  "python.pythonPath": "~/.local/share/virtualenvs/messagebus-kafka-python-4EiFMDS9/bin/python",
+  "python.pipenvPath": "pipenv",
+  "python.formatting.provider": "black"
+}
