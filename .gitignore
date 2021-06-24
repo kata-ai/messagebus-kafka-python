@@ -3,3 +3,4 @@ __pycache__
 Pipfile.lock
 *.back
 .vscode
+.pytest_cache
