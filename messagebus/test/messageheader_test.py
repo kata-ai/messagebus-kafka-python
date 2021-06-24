@@ -16,7 +16,7 @@ class MessageBusHeaderTest(unittest.TestCase):
 		# conversation_id
 		self.assertIsNotNone(message_header_dict.get('conversation_id'), message_header_dict.get('message_id'))
 		# origin_service
-		self.assertEqual(message_header_dict.get('origin_service'), 'unknown_service_name')
+		self.assertEqual(message_header_dict.get('origin_service'), 'unknown-service-name')
 		# origin_hostname
 		self.assertIsNotNone(message_header_dict.get('origin_hostname'))
 		self.assertNotEqual(message_header_dict.get('origin_hostname'), '')
