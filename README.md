@@ -23,6 +23,13 @@ pip3 install .
 
 This package implements the interface for producer/consumer APIs to push/read messages to/from Kafka via AvroSerializer.
 
+## Testing
+
+```bash
+cd messagebus
+pytest -v
+```
+
 ### Examples
 #### Producers
 
