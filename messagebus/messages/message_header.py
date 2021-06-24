@@ -1,3 +1,4 @@
+from typing import Mapping
 from uuid import uuid4
 import socket
 from datetime import datetime
@@ -22,7 +23,7 @@ class MessageHeader():
         self.message_bus_version = f"python:kafka_message_bus:v{version}"
         self.timestamp = str(int(datetime.now().timestamp() * 1000))
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> Mapping[str, str]:
         return {
             'value_subject': self.value_subject,
             'message_id': self.message_id,
