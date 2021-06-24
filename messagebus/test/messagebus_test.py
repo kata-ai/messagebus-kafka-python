@@ -17,11 +17,11 @@ class MessageBusTest(unittest.TestCase):
     Implements test functions
     """
 
-    username = ""
-    password = ""
-    broker = ""
-    schema_registry_url = ""
-    script_location = ""
+    username = "username"
+    password = "password"
+    broker = "localhost:9092"
+    schema_registry_url = "http://localhost:8081"
+    script_location = Path(__file__).absolute().parent.parent
 
     def test_consumer_producer(self):
         from threading import Thread
@@ -62,7 +62,8 @@ class MessageBusTest(unittest.TestCase):
                         "MyProducer: Successfully produced to {} [{}] at offset {}".format(
                             msg.topic(), msg.partition(), msg.offset()
                         )
-                )
+                    )
+
         producer = MyProducer(
             {
                 **conf,
@@ -92,7 +93,7 @@ class MessageBusTest(unittest.TestCase):
                 self.parent = parent
 
             def handle_message(self, message):
-                print('message:', message)
+                print("message:", message)
 
         # create a consumer
         consumer = TestConsumer(

@@ -9,6 +9,7 @@ confluent-kafka = {extras = ["avro"], version = "*"}
 [dev-packages]
 pylint = "*"
 black = "*"
+pytest = "*"
 
 [requires]
 python_version = "3.7"
