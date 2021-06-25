@@ -37,9 +37,3 @@ class MessageHeader():
 
     def __str__(self) -> str:
         return json.dumps(self.to_dict())
-
-
-if __name__ == "__main__":
-    message_header = MessageHeader()
-    message_header_str = message_header.__str__()
-    print(message_header_str, message_header.to_dict())
