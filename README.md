@@ -33,7 +33,7 @@ pytest -v
 ### Examples
 #### Producers
 
-Example for usage available at the end of [here](https://github.com/kata-ai/messagebus-kafka-python/blob/master/messagebus/producer.py)
+Example for usage available at the end of [here](./messagebus/producer.py)
 
 Run the example with this command:
 
@@ -43,7 +43,7 @@ python producer.py "<bootstrap-brokers>" "<schema-registry-url>" "<username>" "<
 
 #### Consumers
 
-Example for usage available at [here](https://github.com/kata-ai/messagebus-kafka-python/blob/master/messagebus/test/messagebus_test.py)
+Example for usage available at [here](./messagebus/test/messagebus_test.py)
 
 Run the example with this command:
 
