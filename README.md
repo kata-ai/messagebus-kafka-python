@@ -10,6 +10,7 @@
 or install from requirements.txt
 
 ```bash
+docker-compose up
 pip install -r requirements.txt 
 ```
 
