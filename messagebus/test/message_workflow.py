@@ -14,7 +14,6 @@ class TestConsumer(Consumer):
     def handle_message(self, message):
         self.received_message = message
         print('Message received: {}'.format(received_message))
-        self.shutdown()
 
 
 class TestProducer(Producer):
@@ -41,13 +40,10 @@ class MessageBusTest(unittest.TestCase):
         self.username = 'username'
         self.password = 'password'
         self.schema_registry_url = 'http://localhost:8081'
+        self.broker='localhost:9092'
         self.script_location = Path(__file__).absolute().parent.parent
         self.conf = {
             'bootstrap.servers': self.broker,
-            'sasl.mechanism': 'SCRAM-SHA-512',
-            'security.protocol': 'SASL_PLAINTEXT',
-            'sasl.username': self.username,
-            'sasl.password': self.password,
         }
         # adminApi
         self.api = self._get_api()
@@ -74,6 +70,7 @@ class MessageBusTest(unittest.TestCase):
         print(produce_result)
         while self.consumer.received_message is None:
             time.sleep(1)
+        self.consumer.shutdown()
         consume_thread.join()
         # TODO: assert instead of print
         print(self.consumer.received_message)
