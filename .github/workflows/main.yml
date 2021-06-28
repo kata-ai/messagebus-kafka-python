@@ -26,12 +26,12 @@ jobs:
           pip install pipenv
           pipenv lock --dev -r > requirements.txt
           pip install -U -r requirements.txt
-          pipenv install
+          pipenv install --dev
       - name: Install kafka
         run: |
           docker-compose up -d
       - name: Run tests
-        run: tox -e py
+        run: python -m tox -e py
       - name: Upload coverage.xml to codecov
         if: ${{ matrix.python-version == 3.9 }}
         uses: codecov/codecov-action@v1
