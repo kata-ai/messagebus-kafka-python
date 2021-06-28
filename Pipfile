@@ -10,9 +10,13 @@ confluent-kafka = {extras = ["avro"], version = "*"}
 pylint = "*"
 black = "*"
 pytest = "*"
+coverage = "*"
+tox = "*"
+tox-pipenv = "*"
+pytest-coverage = "*"
 
 [requires]
-python_version = "3.7"
+python_version = "3"
 
 [pipenv]
 allow_prereleases = true
