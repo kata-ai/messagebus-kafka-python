@@ -101,7 +101,6 @@ class MessageBusTest(unittest.TestCase):
                     "auto.offset.reset": "earliest",
                     "group.id": "default",
                     "schema.registry.url": self.schema_registry_url,
-                    'subject.name.strategy': record_subject_name_strategy,
                 },
             },
             key_schema,

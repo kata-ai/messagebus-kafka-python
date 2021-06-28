@@ -8,7 +8,7 @@ from confluent_kafka import avro, DeserializingConsumer
 from confluent_kafka.avro import AvroConsumer, SerializerError
 from confluent_kafka.cimpl import KafkaError
 from confluent_kafka.schema_registry import SchemaRegistryClient
-from confluent_kafka.schema_registry.avro import AvroSerializer
+from confluent_kafka.schema_registry.avro import AvroDeserializer
 
 
 from messagebus.base import Base
@@ -34,47 +34,11 @@ class Consumer(Base):
         reader_key_schema = avro.loads(key_schema_str)
         reader_value_schema = avro.loads(value_schema_str)
 
-        if 'subject.name.strategy' in conf:
-            schema_registry_client = SchemaRegistryClient(
-                {
-                    "url": conf["schema.registry.url"],
-                }
-            )
-
-            key_serializer = AvroSerializer(
-                schema_str=key_schema_str,
-                schema_registry_client=schema_registry_client,
-                conf={
-                    "auto.register.schemas": True,
-                    "subject.name.strategy": conf['subject.name.strategy'],
-                },
-            )
-
-            value_serializer = AvroSerializer(
-                schema_str=value_schema_str,
-                schema_registry_client=schema_registry_client,
-                conf={
-                    "auto.register.schemas": True,
-                    "subject.name.strategy": conf['subject.name.strategy'],
-                },
-            )
-
-            serializer_conf = {
-                "key.serializer": key_serializer,
-                "value.serializer": value_serializer,
-            }
-
-            del conf["schema.registry.url"]
-            del conf['subject.name.strategy']
-
-            conf.update(serializer_conf)
-            self.producer = DeserializingConsumer(conf)
-        else:
-            self.consumer = AvroConsumer(
-                conf,
-                reader_key_schema=reader_key_schema,
-                reader_value_schema=reader_value_schema,
-            )
+        self.consumer = AvroConsumer(
+            conf,
+            reader_key_schema=reader_key_schema,
+            reader_value_schema=reader_value_schema,
+        )
         self.running = True
         self.topics = topics
         self.batch_size = batch_size
