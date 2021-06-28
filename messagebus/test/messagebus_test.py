@@ -10,6 +10,7 @@ from pathlib import Path
 from messagebus.admin import AdminApi
 from messagebus.consumer import Consumer
 from messagebus.producer import Producer
+from confluent_kafka.schema_registry import record_subject_name_strategy
 
 
 class MessageBusTest(unittest.TestCase):
@@ -28,10 +29,6 @@ class MessageBusTest(unittest.TestCase):
 
         conf = {
             "bootstrap.servers": self.broker,
-            "sasl.mechanism": "SCRAM-SHA-512",
-            "security.protocol": "SASL_PLAINTEXT",
-            "sasl.username": self.username,
-            "sasl.password": self.password,
         }
         # Create Admin API object
         api = AdminApi(conf)
@@ -69,6 +66,7 @@ class MessageBusTest(unittest.TestCase):
                 **conf,
                 **{
                     "schema.registry.url": self.schema_registry_url,
+                    'subject.name.strategy': record_subject_name_strategy,
                     # "on_delivery": on_delivery_callback,  # you can use this item to catch the produce_sync callback
                 },
             },
@@ -103,6 +101,7 @@ class MessageBusTest(unittest.TestCase):
                     "auto.offset.reset": "earliest",
                     "group.id": "default",
                     "schema.registry.url": self.schema_registry_url,
+                    'subject.name.strategy': record_subject_name_strategy,
                 },
             },
             key_schema,
