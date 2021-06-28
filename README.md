@@ -1,13 +1,9 @@
 # Kafka Message Bus
 
+![image](https://github.com/kata-ai/messagebus-kafka-python/workflows/CI/badge.svg?branch=master%0A%20:target:%20https://github.com/kata-ai/messagebus-kafka-python/actions?workflow=CI%0A%20:alt:%20CI%20Status)
 
-.. image:: https://github.com/kata-ai/messagebus-kafka-python/workflows/CI/badge.svg?branch=master
-    :target: https://github.com/kata-ai/messagebus-kafka-python/actions?workflow=CI
-    :alt: CI Status
+![image](https://img.shields.io/codecov/c/github/kata-ai/messagebus-kafka-python.svg%0A%20:target:%20http://codecov.io/github/kata-ai/messagebus-kafka-python?branch=master%0A%20:alt:%20Coverage%20report)
 
-.. image:: https://img.shields.io/codecov/c/github/kata-ai/messagebus-kafka-python.svg?style=flat
-    :alt: Codecov
-    
 ## Overview
 
 ## Requirements
