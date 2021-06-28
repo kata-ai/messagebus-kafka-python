@@ -14,6 +14,7 @@ class TestConsumer(Consumer):
     def handle_message(self, message):
         self.received_message = message
         print('Message received: {}'.format(received_message))
+        self.shutdown()
 
 
 class TestProducer(Producer):
@@ -73,6 +74,7 @@ class MessageBusTest(unittest.TestCase):
         print(produce_result)
         while self.consumer.received_message is None:
             time.sleep(1)
+        consume_thread.join()
         # TODO: assert instead of print
         print(self.consumer.received_message)
 
