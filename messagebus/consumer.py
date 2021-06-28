@@ -4,9 +4,12 @@ Defines AvroConsumer API class which exposes interface for various consumer func
 """
 import importlib
 
-from confluent_kafka import avro
+from confluent_kafka import avro, DeserializingConsumer
 from confluent_kafka.avro import AvroConsumer, SerializerError
 from confluent_kafka.cimpl import KafkaError
+from confluent_kafka.schema_registry import SchemaRegistryClient
+from confluent_kafka.schema_registry.avro import AvroDeserializer
+
 
 from messagebus.base import Base
 
