@@ -26,6 +26,7 @@ jobs:
           pip install pipenv
           pipenv lock --dev -r > requirements.txt
           pip install -U -r requirements.txt
+          pipenv install
       - name: Install kafka
         run: |
           docker-compose up -d
