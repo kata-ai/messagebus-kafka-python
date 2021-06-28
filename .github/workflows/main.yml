@@ -31,7 +31,7 @@ jobs:
         run: |
           docker-compose up -d
       - name: Run tests
-        run: python -m tox -e py
+        run: cd messagebus && pytest -v
       - name: Upload coverage.xml to codecov
         if: ${{ matrix.python-version == 3.9 }}
         uses: codecov/codecov-action@v1
