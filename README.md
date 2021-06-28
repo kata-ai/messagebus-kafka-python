@@ -1,6 +1,5 @@
-=========
-Kafka Message Bus
-=========
+# Kafka Message Bus
+
 
 .. image:: https://github.com/kata-ai/messagebus-kafka-python/workflows/CI/badge.svg?branch=master
     :target: https://github.com/kata-ai/messagebus-kafka-python/actions?workflow=CI
