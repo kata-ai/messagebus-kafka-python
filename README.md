@@ -28,7 +28,7 @@ This package implements the interface for producer/consumer APIs to push/read me
 
 ```bash
 cd messagebus
-pytest -v
+pytest -v -rPx
 ```
 
 ### Examples

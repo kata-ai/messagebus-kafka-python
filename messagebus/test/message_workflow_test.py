@@ -2,6 +2,9 @@ import unittest
 import time
 from pathlib import Path
 from messagebus.admin import AdminApi
+from messagebus.consumer import Consumer
+from messagebus.producer import Producer
+
 from threading import Thread
 
 class TestConsumer(Consumer):
@@ -13,7 +16,7 @@ class TestConsumer(Consumer):
 
     def handle_message(self, message):
         self.received_message = message
-        print('Message received: {}'.format(received_message))
+        print('Message received: {}'.format(self.received_message))
 
 
 class TestProducer(Producer):
@@ -35,8 +38,8 @@ class TestProducer(Producer):
 
 class MessageBusTest(unittest.TestCase):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, methodName='runTest'):
+        super().__init__(methodName)
         self.username = 'username'
         self.password = 'password'
         self.schema_registry_url = 'http://localhost:8081'
@@ -50,7 +53,7 @@ class MessageBusTest(unittest.TestCase):
         # create topics
         self.topic_test_1 = str("dev-python-messagebus-test1")
         self.topic_test_2 = str("dev-python-messagebus-test2")
-        self.topics = [topic_test_1, topic_test_2]
+        self.topics = [self.topic_test_1, self.topic_test_2]
         self.api.create_topics(self.topics)
         # create key and value schema
         self.key_schema = self._get_key_schema()
@@ -64,16 +67,17 @@ class MessageBusTest(unittest.TestCase):
         consume_thread.start()
         produce_result = self.producer.produce_async(
             self.topic_test_1,
-            {"name": "Johny", "age": 29},
+            {'name': 'Johny', 'age': 29},
         )
-        # TODO: use assert instead of print
-        print(produce_result)
+        print("producer's produce_async result", produce_result)
+        self.assertTrue(produce_result)
         while self.consumer.received_message is None:
             time.sleep(1)
         self.consumer.shutdown()
         consume_thread.join()
-        # TODO: assert instead of print
-        print(self.consumer.received_message)
+        print("consumer's received_message", self.consumer.received_message)
+        self.assertEqual(self.consumer.received_message['name'], 'Johny')
+        self.assertEqual(self.consumer.received_message['age'], 29)
 
 
     def _get_producer(self) -> TestProducer:
@@ -90,7 +94,7 @@ class MessageBusTest(unittest.TestCase):
         )
 
     
-    def _get_consumer(self, topics: List[str]) -> TestConsumer:
+    def _get_consumer(self) -> TestConsumer:
         return TestConsumer(
             {
                 **self.conf,
@@ -107,7 +111,7 @@ class MessageBusTest(unittest.TestCase):
 
 
     def _get_api(self) -> AdminApi:
-        api = AdminApi(conf)
+        api = AdminApi(self.conf)
         for a in api.list_topics():
             print("Topic {}".format(a))
         return api
