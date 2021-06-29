@@ -1,57 +1,57 @@
-# Kafka Message Bus
+# **Kafka Message Bus**
 
 ![image](https://github.com/kata-ai/messagebus-kafka-python/workflows/CI/badge.svg?branch=master%0A%20:target:%20https://github.com/kata-ai/messagebus-kafka-python/actions?workflow=CI%0A%20:alt:%20CI%20Status)
 
-![image](https://img.shields.io/codecov/c/github/kata-ai/messagebus-kafka-python.svg%0A%20:target:%20http://codecov.io/github/kata-ai/messagebus-kafka-python?branch=master%0A%20:alt:%20Coverage%20report)
+[![codecov](https://codecov.io/gh/kata-ai/messagebus-kafka-python/branch/master/graph/badge.svg?token=SV5XR0IFM5)](https://codecov.io/gh/kata-ai/messagebus-kafka-python)
+## **Overview**
 
-## Overview
+## **Requirements**
 
-## Requirements
-
-- Python 3.7+
+- Python 3.6+
 - confluent-kafka[avro]
 
-or install from requirements.txt
+
+## **Dev Requirements**
 
 ```bash
-docker-compose up
-pip install -r requirements.txt 
+docker-compose up -d
+
+pip install pipenv
+pipenv install
+pipenv shell
 ```
 
-## Installation
+## **Documentaion**
+
+- Configuration properties in [librdkafka](https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md)
+- Confluent producer configuration in [here](https://docs.confluent.io/platform/current/installation/configuration/producer-configs.html)
+- Confluent consumer configuration in [here](https://docs.confluent.io/platform/current/installation/configuration/consumer-configs.html)
+- Python confluent kafka client in [here](https://docs.confluent.io/platform/current/clients/confluent-kafka-python/html/index.html)
+
+
+## **Installation**
 
 ```bash
 pip3 install .
 ```
 
-## Usage
+## **Usage**
 
 This package implements the interface for producer/consumer APIs to push/read messages to/from Kafka via AvroSerializer.
 
-## Testing
+### **Examples**
+
+#### **Producers and Consumer V1**
+
+The example is available in this [test](./messagebus/test/message_workflow_v1_test.py)
+
+#### **Producer and Consumers V2**
+
+The example is available in this [test](./messagebus/test/message_workflow_v2_test.py)
+
+### **Testing**
 
 ```bash
 cd messagebus
 pytest -v -rPx
-```
-
-### Examples
-#### Producers
-
-Example for usage available at the end of [here](./messagebus/producer.py)
-
-Run the example with this command:
-
-```bash
-python producer.py "<bootstrap-brokers>" "<schema-registry-url>" "<username>" "<password>"
-```
-
-#### Consumers
-
-Example for usage available at [here](./messagebus/test/messagebus_test.py)
-
-Run the example with this command:
-
-```bash
-python messagebus_test.py "<bootstrap-brokers>" "<schema-registry-url>" "<username>" "<password>"
 ```
