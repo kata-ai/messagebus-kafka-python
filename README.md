@@ -45,7 +45,6 @@ This package implements the interface for producer/consumer APIs to push/read me
 
 The example is available in this [test](./messagebus/test/message_workflow_v1_test.py)
 
-
 - **Producer** implementation
 ```python
  class MyProducer(Producer):
@@ -58,8 +57,11 @@ The example is available in this [test](./messagebus/test/message_workflow_v1_te
     def delivery_report(self, err, msg, obj=None):
         if err is not None:
             # error handler
+            # code here
             pass 
         else:
+            # success handler
+            # code here
             pass
 
 ```
@@ -67,7 +69,14 @@ The example is available in this [test](./messagebus/test/message_workflow_v1_te
 ```python
 class MyConsumer(Consumer):
 
-    def __init__(self, conf: dict, value_schema_str: str, topics: str, batch_size: int = 5, logger=None):
+    def __init__(
+        self,
+        conf: dict,
+        value_schema_str: str,
+        topics: str,
+        batch_size: int = 5,
+        logger=None,
+    ):
         super().__init__(conf, value_schema_str, topics, batch_size, logger)
         pass
 
@@ -77,9 +86,118 @@ class MyConsumer(Consumer):
         pass
 ```
 
+- Produce a message
+```python
+producer = MyProducer(
+    {
+        "bootstrap.servers": "localhost:9092",
+        "schema.registry.url": "http://localhost:8081"
+    },
+    "<string(json string) avro schema of value>",
+)
+produce_result = producer.produce_async(
+    "test_topic",
+    {"name": "Johny", "age": 29},
+)
+```
+- Consume a message
+```python
+consumer = MyConsumer(
+    {
+        "bootstrap.servers": "localhost:9092",
+        "schema.registry.url": "http://localhost:8081"
+        "auto.offset.reset": "earliest",
+        "group.id": "default",
+    },
+    "<string(json string) avro schema of value>",
+    "test_topic",
+)
+consume_thread = Thread(target=consumer.consume_auto, daemon=True)
+consume_thread.start()
+consumer.shutdown()
+consume_thread.join()
+``` 
+
 #### **Producer and Consumers V2**
 
 The example is available in this [test](./messagebus/test/message_workflow_v2_test.py)
+
+
+- **Producer** implementation
+```python
+ class MyProducer(Producer):
+
+    def __init__(self, conf, key_schema_str: str, value_schema_str: str, logger=None, **kwargs):
+        super().__init__(conf, key_schema_str, value_schema_str, logger, **kwargs)
+        pass
+
+    # kafka delivery callback handler
+    def delivery_report(self, err, msg, obj=None):
+        if err is not None:
+            # error handler
+            # code here
+            pass 
+        else:
+            # success handler
+            # code here
+            pass
+
+```
+- **Consumer** implementation
+```python
+class MyConsumer(Consumer):
+
+    def __init__(
+        self,
+        conf: dict,
+        key_schema_str: str,
+        value_schema_str: str,
+        topics: str,
+        batch_size: int = 5,
+        logger=None,
+    ):
+        super().__init__(conf, key_schema_str, value_schema_str, topics, batch_size, logger)
+        pass
+
+    # message handler overrider
+    def handle_message(self, topic: str, key, value, headers: dict):
+        # code here
+        pass
+```
+
+- Produce a message
+```python
+producer = MyProducer(
+    {
+        "bootstrap.servers": "localhost:9092",
+        "schema.registry.url": "http://localhost:8081"
+    },
+    "<string(json string) avro schema of key>",
+    "<string(json string) avro schema of value>",
+)
+produce_result = producer.produce_async(
+    "test_topic",
+    {"name": "Johny", "age": 29},
+    key="<UUID>"
+)
+```
+- Consume a message
+```python
+consumer = MyConsumer(
+    {
+        "bootstrap.servers": "localhost:9092",
+        "schema.registry.url": "http://localhost:8081"
+        "auto.offset.reset": "earliest",
+        "group.id": "default",
+    },
+    "<string(json string) avro schema of key>",
+    "<string(json string) avro schema of value>",
+    "test_topic",
+)
+consume_thread = Thread(target=consumer.consume_auto, daemon=True)
+consume_thread.start()
+consumer.shutdown()
+consume_thread.join()
 
 ### **Testing**
 
