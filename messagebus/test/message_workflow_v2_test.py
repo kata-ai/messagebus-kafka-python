@@ -7,19 +7,22 @@ from messagebus.producer import Producer
 
 from threading import Thread
 
-class TestConsumer(Consumer):
+class MyConsumer(Consumer):
 
     def __init__(self, conf: dict, key_schema_str: str, value_schema_str: str, topics: str, batch_size: int = 5, logger=None):
         super().__init__(conf, key_schema_str, value_schema_str, topics, batch_size, logger)
         self.received_message = None
 
 
-    def handle_message(self, message):
-        self.received_message = message
-        print('Message received: {}'.format(self.received_message))
+    def handle_message(self, topic: str, key: dict, value: dict, headers: dict):
+        self.received_message = value
+        self.log_debug("Message received for topic " + topic)
+        self.log_debug("Key = {}".format(key))
+        self.log_debug("Value = {}".format(value))
+        self.log_debug("Headers = {}".format(headers))
+        
 
-
-class TestProducer(Producer):
+class MyProducer(Producer):
 
     def __init__(self, conf, key_schema_str: str, value_schema_str: str, logger=None, **kwargs):
         super().__init__(conf, key_schema_str, value_schema_str, logger, **kwargs)
@@ -80,8 +83,8 @@ class MessageBusTest(unittest.TestCase):
         self.assertEqual(self.consumer.received_message['age'], 29)
 
 
-    def _get_producer(self) -> TestProducer:
-        return TestProducer(
+    def _get_producer(self) -> MyProducer:
+        return MyProducer(
             {
                 **self.conf,
                 **{
@@ -94,8 +97,8 @@ class MessageBusTest(unittest.TestCase):
         )
 
     
-    def _get_consumer(self) -> TestConsumer:
-        return TestConsumer(
+    def _get_consumer(self) -> MyConsumer:
+        return MyConsumer(
             {
                 **self.conf,
                 **{
