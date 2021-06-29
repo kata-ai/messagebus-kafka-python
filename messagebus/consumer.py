@@ -63,7 +63,7 @@ class Consumer(Base):
         class_ = getattr(module, class_name)
         return class_
 
-    def process_message(self, topic: str, key: dict, value: dict):
+    def handle_message(self, topic: str, key: dict, value: dict, headers: dict):
         """
         Process the incoming message. Must be overridden in the derived class
         :param topic: topic name
@@ -74,14 +74,7 @@ class Consumer(Base):
         self.log_debug("Message received for topic " + topic)
         self.log_debug("Key = {}".format(key))
         self.log_debug("Value = {}".format(value))
-        self.handle_message(message=value)
-
-    def handle_message(self, message):
-        """
-        Handle incoming message; must be overridden by the derived class
-        :param message: incoming message
-        """
-        print(message)
+        self.log_debug("Headers = {}".format(headers))
 
     def consume_auto(self):
         """
@@ -108,8 +101,8 @@ class Consumer(Base):
                     elif msg.error():
                         self.log_error("Consumer error: {}".format(msg.error()))
                         continue
-
-                self.process_message(msg.topic(), msg.key(), msg.value())
+                
+                self.handle_message(msg.topic(), msg.key(), msg.value(), msg.headers())
             except SerializerError as e:
                 # Report malformed record, discard results, continue polling
                 self.log_error("Message deserialization failed {}".format(e))
@@ -147,7 +140,7 @@ class Consumer(Base):
                         self.log_error("Consumer error: {}".format(msg.error()))
                         continue
 
-                self.process_message(msg.topic(), msg.key(), msg.value())
+                self.handle_message(msg.topic(), msg.key(), msg.value(), msg.headers())
                 msg_count += 1
                 if msg_count % self.batch_size == 0:
                     self.consumer.commit(asynchronous=False)
