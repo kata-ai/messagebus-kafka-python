@@ -15,6 +15,7 @@ codecov = "*"
 tox = "*"
 tox-pipenv = "*"
 pytest-coverage = "*"
+autopep8 = "*"
 
 [requires]
 python_version = "3"
