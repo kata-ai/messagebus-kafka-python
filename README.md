@@ -198,10 +198,14 @@ consume_thread = Thread(target=consumer.consume_auto, daemon=True)
 consume_thread.start()
 consumer.shutdown()
 consume_thread.join()
-
+```
 ### **Testing**
 
 ```bash
+tox -e py
+
+# or 
+
 cd messagebus
 pytest -v -rPx
 ```
