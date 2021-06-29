@@ -67,8 +67,8 @@ class MessageBusTest(unittest.TestCase):
         # adminApi
         self.api = self._get_api()
         # create topics
-        self.topic_test_1 = f"dev-python-messagebus-test{random.randint(0, 4)}"
-        self.topic_test_2 = f"dev-python-messagebus-test{random.randint(5, 9)}"
+        self.topic_test_1 = f"dev-python-messagebus-test{random.randint(21, 30)}"
+        self.topic_test_2 = f"dev-python-messagebus-test{random.randint(31, 40)}"
         self.topics = [self.topic_test_1, self.topic_test_2]
         self.api.create_topics(self.topics)
         # create key and value schema

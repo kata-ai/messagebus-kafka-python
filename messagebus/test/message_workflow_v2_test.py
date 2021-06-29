@@ -65,8 +65,8 @@ class MessageBusTest(unittest.TestCase):
         # adminApi
         self.api = self._get_api()
         # create topics
-        self.topic_test_1 = f"dev-python-messagebus-test{random.randint(0, 4)}"
-        self.topic_test_2 = f"dev-python-messagebus-test{random.randint(5, 9)}"
+        self.topic_test_1 = f"dev-python-messagebus-test{random.randint(1, 10)}"
+        self.topic_test_2 = f"dev-python-messagebus-test{random.randint(11, 20)}"
         self.topics = [self.topic_test_1, self.topic_test_2]
         self.api.create_topics(self.topics)
         # create key and value schema
@@ -79,7 +79,7 @@ class MessageBusTest(unittest.TestCase):
         consume_thread = Thread(target=self.consumer.consume_auto, daemon=True)
         consume_thread.start()
         produce_result = self.producer.produce_async(
-            self.topic_test_1,
+            self.topic_test_2,
             {"name": "Johny", "age": 29},
         )
         print("producer's produce_async result", produce_result)
@@ -120,7 +120,7 @@ class MessageBusTest(unittest.TestCase):
             },
             self.key_schema,
             self.val_schema,
-            [self.topic_test_1],
+            [self.topic_test_2],
         )
 
     def _get_api(self) -> AdminApi:
