@@ -3,4 +3,10 @@ __pycache__
 Pipfile.lock
 *.back
 .vscode
+
+# Unit test / coverage reports
 .pytest_cache
+.tox/
+.coverage
+.cache
+coverage.xml
