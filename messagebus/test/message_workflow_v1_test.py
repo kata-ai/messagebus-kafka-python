@@ -94,6 +94,9 @@ class MessageBusTest(unittest.TestCase):
         self.assertEqual(self.consumer.received_message['name'], 'Johny')
         self.assertEqual(self.consumer.received_message['age'], 29)
 
+        # delete topics
+        self.api.delete_topics(self.topics)
+
 
     def _get_producer(self) -> MyProducer:
         return MyProducer(
