@@ -45,6 +45,38 @@ This package implements the interface for producer/consumer APIs to push/read me
 
 The example is available in this [test](./messagebus/test/message_workflow_v1_test.py)
 
+
+- **Producer** implementation
+```python
+ class MyProducer(Producer):
+
+    def __init__(self, conf, value_schema_str: str, logger=None, **kwargs):
+        super().__init__(conf, value_schema_str, logger, **kwargs)
+        pass
+
+    # kafka delivery callback handler
+    def delivery_report(self, err, msg, obj=None):
+        if err is not None:
+            # error handler
+            pass 
+        else:
+            pass
+
+```
+- **Consumer** implementation
+```python
+class MyConsumer(Consumer):
+
+    def __init__(self, conf: dict, value_schema_str: str, topics: str, batch_size: int = 5, logger=None):
+        super().__init__(conf, value_schema_str, topics, batch_size, logger)
+        pass
+
+    # message handler overrider
+    def handle_message(self, topic: str, key, value):
+        # code here
+        pass
+```
+
 #### **Producer and Consumers V2**
 
 The example is available in this [test](./messagebus/test/message_workflow_v2_test.py)
