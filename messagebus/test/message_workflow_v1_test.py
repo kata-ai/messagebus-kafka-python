@@ -141,6 +141,3 @@ class MessageBusTest(unittest.TestCase):
         with open(f"{self.script_location}/schemas/johny_schema.avsc", "r") as f:
             val_schema = f.read()
         return val_schema
-
-
-
