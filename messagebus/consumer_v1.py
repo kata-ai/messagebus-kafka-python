@@ -3,13 +3,11 @@
 Defines AvroConsumer API class which exposes interface for various consumer functions
 """
 import importlib
+from pathlib import Path
 
-from confluent_kafka import avro, DeserializingConsumer
+from confluent_kafka import avro
 from confluent_kafka.avro import AvroConsumer, SerializerError
 from confluent_kafka.cimpl import KafkaError
-from confluent_kafka.schema_registry import SchemaRegistryClient
-from confluent_kafka.schema_registry.avro import AvroDeserializer
-
 
 from messagebus.base import Base
 
@@ -23,13 +21,18 @@ class Consumer(Base):
     def __init__(
         self,
         conf: dict,
-        key_schema_str: str,
         value_schema_str: str,
         topics: str,
         batch_size=5,
         logger=None,
     ):
         super().__init__(logger)
+
+        key_schema_str = ""
+        with open(
+            f"{Path(__file__).absolute().parent}/schemas/message_header.avsc", "r"
+        ) as f:
+            key_schema_str = f.read()
 
         reader_key_schema = avro.loads(key_schema_str)
         reader_value_schema = avro.loads(value_schema_str)
@@ -63,7 +66,7 @@ class Consumer(Base):
         class_ = getattr(module, class_name)
         return class_
 
-    def handle_message(self, topic: str, key: dict, value: dict, headers: dict):
+    def handle_message(self, topic: str, key, value):
         """
         Process the incoming message. Must be overridden in the derived class
         :param topic: topic name
@@ -74,7 +77,6 @@ class Consumer(Base):
         self.log_debug("Message received for topic " + topic)
         self.log_debug("Key = {}".format(key))
         self.log_debug("Value = {}".format(value))
-        self.log_debug("Headers = {}".format(headers))
 
     def consume_auto(self):
         """
@@ -101,8 +103,8 @@ class Consumer(Base):
                     elif msg.error():
                         self.log_error("Consumer error: {}".format(msg.error()))
                         continue
-                
-                self.handle_message(msg.topic(), msg.key(), msg.value(), msg.headers())
+
+                self.handle_message(msg.topic(), msg.key(), msg.value())
             except SerializerError as e:
                 # Report malformed record, discard results, continue polling
                 self.log_error("Message deserialization failed {}".format(e))

@@ -33,11 +33,11 @@ class Producer(Base):
         :param value_schema: loaded avro schema_str for the value
         """
         super().__init__(logger)
-        
+
         default_key_schema = avro.loads(key_schema_str)
         default_value_schema = avro.loads(value_schema_str)
 
-        if 'subject.name.strategy' in conf:
+        if "subject.name.strategy" in conf:
             schema_registry_client = SchemaRegistryClient(
                 {
                     "url": conf["schema.registry.url"],
@@ -49,7 +49,7 @@ class Producer(Base):
                 schema_registry_client=schema_registry_client,
                 conf={
                     "auto.register.schemas": True,
-                    "subject.name.strategy": conf['subject.name.strategy'],
+                    "subject.name.strategy": conf["subject.name.strategy"],
                 },
             )
 
@@ -58,7 +58,7 @@ class Producer(Base):
                 schema_registry_client=schema_registry_client,
                 conf={
                     "auto.register.schemas": True,
-                    "subject.name.strategy": conf['subject.name.strategy'],
+                    "subject.name.strategy": conf["subject.name.strategy"],
                 },
             )
 
@@ -68,7 +68,7 @@ class Producer(Base):
             }
 
             del conf["schema.registry.url"]
-            del conf['subject.name.strategy']
+            del conf["subject.name.strategy"]
 
             conf.update(serializer_conf)
             self.producer = SerializingProducer(conf)
@@ -85,26 +85,27 @@ class Producer(Base):
         :param logger: logger
         """
         self.logger = logger
-    
+
     def delivery_report(self, err, msg, obj=None):
         """
-            Handle delivery reports served from producer.poll.
-            This callback takes an extra argument, obj.
-            This allows the original contents to be included for debugging purposes.
+        Handle delivery reports served from producer.poll.
+        This callback takes an extra argument, obj.
+        This allows the original contents to be included for debugging purposes.
         """
         if err is not None:
-            self.log_error('Error {}'.format(err))
+            self.log_error("Error {}".format(err))
         else:
-            self.log_debug('Successfully produced to {} [{}] at offset {}'.format(
-                msg.topic(), msg.partition(), msg.offset()))
+            self.log_debug(
+                "Successfully produced to {} [{}] at offset {}".format(
+                    msg.topic(), msg.partition(), msg.offset()
+                )
+            )
 
     def __message_header_generator(self) -> dict:
         message_header = MessageHeader()
         return message_header.to_dict()
 
-    def produce_async(
-        self, topic: str, value, key="default"
-    ) -> bool:
+    def produce_async(self, topic: str, value, key="default") -> bool:
         """
         Produce records for a specific topic
         :param topic: topic to which messages are written to
