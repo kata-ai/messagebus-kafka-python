@@ -2,7 +2,7 @@ from typing import Mapping
 from uuid import uuid4
 import socket
 from datetime import datetime
-from messagebus import __VERSION__ as version
+from kafka_message_bus import __VERSION__ as version
 import json
 
 class MessageHeader():

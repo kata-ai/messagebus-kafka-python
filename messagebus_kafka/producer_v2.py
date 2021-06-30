@@ -3,16 +3,16 @@
 Defines Producer class which exposes interface for various producer functions
 """
 import traceback
-
 from pathlib import Path
+
 from confluent_kafka import SerializingProducer
 from confluent_kafka.schema_registry import (
     SchemaRegistryClient,
-    record_subject_name_strategy,
+    topic_subject_name_strategy,
 )
+from messagebus_kafka.base import Base
+from messagebus_kafka.messages.message_header import MessageHeader
 from confluent_kafka.schema_registry.avro import AvroSerializer
-from messagebus.base import Base
-from messagebus.messages.message_key import MessageKey
 
 
 class Producer(Base):
@@ -21,7 +21,11 @@ class Producer(Base):
     It is expected that the users would extend this class and override on_delivery function.
     """
 
-    def __init__(self, conf, value_schema_str: str, logger=None, **kwargs):
+    use_default_key_schema = False
+
+    def __init__(
+        self, conf, value_schema_str: str, key_schema_str=None, logger=None, **kwargs
+    ):
         """
         Initialize the Producer
         :param conf: configuration e.g:
@@ -32,13 +36,14 @@ class Producer(Base):
         """
         super().__init__(logger)
 
-        with open(
-            f"{Path(__file__).absolute().parent}/schemas/message_header.avsc", "r"
-        ) as f:
-            key_schema_str = f.read()
+        if not key_schema_str:
+            self.use_default_key_schema = True
 
-        if "subject.name.strategy" not in conf:
-            conf["subject.name.strategy"] = record_subject_name_strategy
+            with open(f"{Path(__file__).absolute().parent}/schemas/key.avsc", "r") as f:
+                key_schema_str = f.read()
+
+        if not ("subject.name.strategy" in conf):
+            conf["subject.name.strategy"] = topic_subject_name_strategy
 
         schema_registry_client = SchemaRegistryClient(
             {
@@ -97,11 +102,11 @@ class Producer(Base):
                 )
             )
 
-    def __message_key_generator(self) -> dict:
-        message_key = MessageKey()
-        return message_key.to_dict()
+    def __message_header_generator(self) -> dict:
+        message_header = MessageHeader()
+        return message_header.to_dict()
 
-    def produce_async(self, topic: str, value) -> bool:
+    def produce_async(self, topic: str, value, key=None) -> bool:
         """
         Produce records for a specific topic
         :param topic: topic to which messages are written to
@@ -117,10 +122,18 @@ class Producer(Base):
         try:
             # The message passed to the delivery callback will already be serialized.
             # To aid in debugging we provide the original object to the delivery callback.
+            if not self.use_default_key_schema and not key:
+                raise KeyError("Key cannot be empty.")
+
+            headers = self.__message_header_generator()
+            if self.use_default_key_schema:
+                key = headers["message_id"]
+
             self.producer.produce(
                 topic=topic,
-                key=self.__message_key_generator(),
+                key=key,
                 value=value,
+                headers=headers,
                 on_delivery=self.delivery_report,
             )
             # Serve on_delivery callbacks from previous asynchronous produce()
@@ -131,7 +144,7 @@ class Producer(Base):
             self.log_error("Invalid input, discarding record...{}".format(ex))
         return False
 
-    def produce_sync(self, topic: str, value) -> bool:
+    def produce_sync(self, topic: str, value, key=None) -> bool:
         """
         Produce records for a specific topic
         :param topic: topic to which messages are written to
@@ -139,16 +152,23 @@ class Producer(Base):
         :return:
         """
         try:
-            key = self.__message_header_generator()
+            if not self.use_default_key_schema and not key:
+                raise KeyError("Key cannot be empty.")
+
             self.log_debug("Record type={}".format(type(value)))
             self.log_debug("Producing key {} to topic {}.".format(key, topic))
             self.log_debug("Producing record {} to topic {}.".format(value, topic))
 
             # Pass the message synchronously
+            headers = self.__message_header_generator()
+            if self.use_default_key_schema:
+                key = headers["message_id"]
+
             self.producer.produce(
                 topic=topic,
                 key=key,
                 value=value,
+                headers=headers,
             )
             self.producer.flush()
             return True

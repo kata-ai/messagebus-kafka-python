@@ -1,7 +1,7 @@
 # coding: utf-8
 
 from setuptools import setup, find_packages
-from messagebus import __VERSION__
+from messagebus_kafka import __VERSION__
 
 NAME = "kafka-message-bus"
 VERSION = __VERSION__

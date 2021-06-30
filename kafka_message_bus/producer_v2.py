@@ -10,8 +10,8 @@ from confluent_kafka.schema_registry import (
     SchemaRegistryClient,
     topic_subject_name_strategy,
 )
-from messagebus.base import Base
-from messagebus.messages.message_header import MessageHeader
+from kafka_message_bus.base import Base
+from kafka_message_bus.messages.message_header import MessageHeader
 from confluent_kafka.schema_registry.avro import AvroSerializer
 
 
