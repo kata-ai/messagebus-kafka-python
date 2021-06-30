@@ -2,7 +2,7 @@
 Defines Admin API class which exposes interface for various admin client functions
 """
 from confluent_kafka.admin import AdminClient, NewTopic, NewPartitions
-from messagebus.base import Base
+from messagebus_kafka.base import Base
 
 
 class AdminApi(Base):

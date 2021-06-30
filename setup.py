@@ -1,7 +1,7 @@
 # coding: utf-8
 
 from setuptools import setup, find_packages
-from messagebus import __VERSION__
+from messagebus_kafka import __VERSION__
 
 NAME = "kafka-message-bus"
 VERSION = __VERSION__
@@ -27,6 +27,7 @@ setup(
     keywords=["Kafka", "Kafka Message Bus"],
     install_requires=REQUIRES,
     packages=find_packages(),
+    package_data={'messagebus_kafka': ['schemas/*.avsc']},
     include_package_data=True,
     long_description=long_description,
     long_description_content_type="text/markdown",

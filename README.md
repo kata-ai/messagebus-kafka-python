@@ -43,7 +43,7 @@ This package implements the interface for producer/consumer APIs to push/read me
 
 #### **Producers and Consumer V1**
 
-The example is available in this [test](./messagebus/test/message_workflow_v1_test.py)
+The example is available in this [test](messagebus_kafka/test/message_workflow_v1_test.py)
 
 - **Producer** implementation
 ```python
@@ -105,7 +105,7 @@ consume_thread.join()
 
 #### **Producer and Consumers V2**
 
-The example is available in this [test](./messagebus/test/message_workflow_v2_test.py)
+The example is available in this [test](messagebus_kafka/test/message_workflow_v2_test.py)
 
 
 - **Producer** implementation

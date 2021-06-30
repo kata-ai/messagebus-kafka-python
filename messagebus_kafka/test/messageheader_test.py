@@ -1,5 +1,5 @@
 import unittest
-from messagebus.messages.message_header import MessageHeader
+from messagebus_kafka.messages.message_header import MessageHeader
 
 class MessageBusHeaderTest(unittest.TestCase):
 

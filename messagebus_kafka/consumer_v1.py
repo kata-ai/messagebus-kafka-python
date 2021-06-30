@@ -9,7 +9,7 @@ from confluent_kafka import avro
 from confluent_kafka.avro import AvroConsumer, SerializerError
 from confluent_kafka.cimpl import KafkaError
 
-from messagebus.base import Base
+from messagebus_kafka.base import Base
 
 
 class Consumer(Base):
@@ -23,14 +23,15 @@ class Consumer(Base):
         conf: dict,
         value_schema_str: str,
         topics: str,
-        key_schema_str=None,
         batch_size=5,
         logger=None,
     ):
         super().__init__(logger)
-        if not key_schema_str:
-            with open(f"{Path(__file__).absolute().parent}/schemas/key.avsc", "r") as f:
-                key_schema_str = f.read()
+
+        with open(
+            f"{Path(__file__).absolute().parent}/schemas/message_header.avsc", "r"
+        ) as f:
+            key_schema_str = f.read()
 
         reader_key_schema = avro.loads(key_schema_str)
         reader_value_schema = avro.loads(value_schema_str)
@@ -64,7 +65,7 @@ class Consumer(Base):
         class_ = getattr(module, class_name)
         return class_
 
-    def handle_message(self, topic: str, key, value, headers: dict):
+    def handle_message(self, topic: str, key, value):
         """
         Process the incoming message. Must be overridden in the derived class
         :param topic: topic name
@@ -75,7 +76,6 @@ class Consumer(Base):
         self.log_debug("Message received for topic " + topic)
         self.log_debug("Key = {}".format(key))
         self.log_debug("Value = {}".format(value))
-        self.log_debug("Headers = {}".format(headers))
 
     def consume_auto(self):
         """
@@ -103,7 +103,7 @@ class Consumer(Base):
                         self.log_error("Consumer error: {}".format(msg.error()))
                         continue
 
-                self.handle_message(msg.topic(), msg.key(), msg.value(), msg.headers())
+                self.handle_message(msg.topic(), msg.key(), msg.value())
             except SerializerError as e:
                 # Report malformed record, discard results, continue polling
                 self.log_error("Message deserialization failed {}".format(e))
