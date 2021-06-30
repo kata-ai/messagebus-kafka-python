@@ -88,7 +88,7 @@ class MessageBusTest(unittest.TestCase):
         produce_result = self.producer.produce_async(
             self.topic_test_2,
             {"name": "Johny", "age": 29},
-            # str(uuid.uuid4()),
+            str(uuid.uuid4()),
         )
         print("producer's produce_async result", produce_result)
         self.assertTrue(produce_result)
