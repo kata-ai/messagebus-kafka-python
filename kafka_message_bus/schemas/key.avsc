@@ -1,5 +1,0 @@
-{
-    "namespace": "ai.kata.kafka",
-    "type": "string",
-    "name": "key"
-}
