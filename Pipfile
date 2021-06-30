@@ -1,0 +1,24 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+confluent-kafka = {extras = ["avro"], version = "*"}
+
+[dev-packages]
+pylint = "*"
+black = "*"
+pytest = "*"
+coverage = "*"
+codecov = "*"
+tox = "*"
+tox-pipenv = "*"
+pytest-coverage = "*"
+autopep8 = "*"
+
+[requires]
+python_version = "3"
+
+[pipenv]
+allow_prereleases = true
