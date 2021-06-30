@@ -35,7 +35,7 @@ class Producer(Base):
         :param value_schema: loaded avro schema_str for the value
         """
         super().__init__(logger)
-        
+
         if not key_schema_str:
             self.use_default_key_schema = True
 
@@ -122,6 +122,9 @@ class Producer(Base):
         try:
             # The message passed to the delivery callback will already be serialized.
             # To aid in debugging we provide the original object to the delivery callback.
+            if not self.use_default_key_schema and not key:
+                raise KeyError("Key cannot be empty.")
+
             headers = self.__message_header_generator()
             self.producer.produce(
                 topic=topic,
@@ -148,6 +151,9 @@ class Producer(Base):
         :return:
         """
         try:
+            if not self.use_default_key_schema and not key:
+                raise KeyError("Key cannot be empty.")
+
             self.log_debug("Record type={}".format(type(value)))
             self.log_debug("Producing key {} to topic {}.".format(key, topic))
             self.log_debug("Producing record {} to topic {}.".format(value, topic))

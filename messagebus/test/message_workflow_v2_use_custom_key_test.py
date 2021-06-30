@@ -2,6 +2,8 @@ import unittest
 import time
 from pathlib import Path
 import random
+import uuid
+
 from messagebus.admin import AdminApi
 from messagebus.consumer_v2 import Consumer
 from messagebus.producer_v2 import Producer
@@ -75,6 +77,7 @@ class MessageBusTest(unittest.TestCase):
         self.topics = [self.topic_test_1, self.topic_test_2]
         self.api.create_topics(self.topics)
         # create key and value schema
+        self.key_schema = self._get_key_schema()
         self.val_schema = self._get_val_schema()
         self.producer = self._get_producer()
         self.consumer = self._get_consumer()
@@ -85,6 +88,7 @@ class MessageBusTest(unittest.TestCase):
         produce_result = self.producer.produce_async(
             self.topic_test_2,
             {"name": "Johny", "age": 29},
+            # str(uuid.uuid4()),
         )
         print("producer's produce_async result", produce_result)
         self.assertTrue(produce_result)
@@ -109,6 +113,7 @@ class MessageBusTest(unittest.TestCase):
                 },
             },
             self.val_schema,
+            self.key_schema,
         )
 
     def _get_consumer(self) -> MyConsumer:
@@ -122,7 +127,8 @@ class MessageBusTest(unittest.TestCase):
                 },
             },
             self.val_schema,
-            [self.topic_test_2]
+            [self.topic_test_2],
+            self.key_schema,
         )
 
     def _get_api(self) -> AdminApi:
@@ -130,6 +136,11 @@ class MessageBusTest(unittest.TestCase):
         for a in api.list_topics():
             print("Topic {}".format(a))
         return api
+
+    def _get_key_schema(self) -> str:
+        with open(f"{self.script_location}/schemas/key.avsc", "r") as f:
+            key_schema = f.read()
+        return key_schema
 
     def _get_val_schema(self) -> str:
         with open(f"{self.script_location}/schemas/johny_schema.avsc", "r") as f:
