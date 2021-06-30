@@ -49,10 +49,6 @@ The example is available in this [test](./messagebus/test/message_workflow_v1_te
 ```python
  class MyProducer(Producer):
 
-    def __init__(self, conf, value_schema_str: str, logger=None, **kwargs):
-        super().__init__(conf, value_schema_str, logger, **kwargs)
-        pass
-
     # kafka delivery callback handler
     def delivery_report(self, err, msg, obj=None):
         if err is not None:
@@ -68,17 +64,6 @@ The example is available in this [test](./messagebus/test/message_workflow_v1_te
 - **Consumer** implementation
 ```python
 class MyConsumer(Consumer):
-
-    def __init__(
-        self,
-        conf: dict,
-        value_schema_str: str,
-        topics: str,
-        batch_size: int = 5,
-        logger=None,
-    ):
-        super().__init__(conf, value_schema_str, topics, batch_size, logger)
-        pass
 
     # message handler overrider
     def handle_message(self, topic: str, key, value):
@@ -127,10 +112,6 @@ The example is available in this [test](./messagebus/test/message_workflow_v2_te
 ```python
  class MyProducer(Producer):
 
-    def __init__(self, conf, value_schema_str: str, key_schema_str: str = None, logger=None, **kwargs):
-        super().__init__(conf, value_schema_str, key_schema_str, logger, **kwargs)
-        pass
-
     # kafka delivery callback handler
     def delivery_report(self, err, msg, obj=None):
         if err is not None:
@@ -146,18 +127,6 @@ The example is available in this [test](./messagebus/test/message_workflow_v2_te
 - **Consumer** implementation
 ```python
 class MyConsumer(Consumer):
-
-    def __init__(
-        self,
-        conf: dict,
-        value_schema_str: str,
-        topics: str,
-        key_schema_str: str = None,
-        batch_size: int = 5,
-        logger=None,
-    ):
-        super().__init__(conf, value_schema_str, topics, key_schema_str, batch_size, logger)
-        pass
 
     # message handler overrider
     def handle_message(self, topic: str, key, value, headers: dict):
@@ -178,7 +147,7 @@ producer = MyProducer(
 produce_result = producer.produce_async(
     "test_topic",
     {"name": "Johny", "age": 29},
-    key="<UUID>"
+    key="<UUID>" # optional (when use custom key schema)
 )
 ```
 - Consume a message
