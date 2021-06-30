@@ -2,12 +2,13 @@ import unittest
 import time
 from pathlib import Path
 import random
-from messagebus.admin import AdminApi
-from messagebus.consumer_v1 import Consumer
-from messagebus.producer_v1 import Producer
-from threading import Thread
+import uuid
 
-from confluent_kafka.schema_registry import record_subject_name_strategy
+from messagebus.admin import AdminApi
+from messagebus.consumer_v2 import Consumer
+from messagebus.producer_v2 import Producer
+
+from threading import Thread
 
 
 class MyConsumer(Consumer):
@@ -16,22 +17,33 @@ class MyConsumer(Consumer):
         conf: dict,
         value_schema_str: str,
         topics: str,
+        key_schema_str: str = None,
         batch_size: int = 5,
         logger=None,
     ):
-        super().__init__(conf, value_schema_str, topics, batch_size, logger)
+        super().__init__(
+            conf, value_schema_str, topics, key_schema_str, batch_size, logger
+        )
         self.received_message = None
 
-    def handle_message(self, topic: str, key, value):
+    def handle_message(self, topic: str, key, value, headers: dict):
         self.received_message = value
         self.log_debug("Message received for topic " + topic)
         self.log_debug("Key = {}".format(key))
         self.log_debug("Value = {}".format(value))
+        self.log_debug("Headers = {}".format(headers))
 
 
 class MyProducer(Producer):
-    def __init__(self, conf, value_schema_str: str, logger=None, **kwargs):
-        super().__init__(conf, value_schema_str, logger, **kwargs)
+    def __init__(
+        self,
+        conf,
+        value_schema_str: str,
+        key_schema_str: str = None,
+        logger=None,
+        **kwargs,
+    ):
+        super().__init__(conf, value_schema_str, key_schema_str, logger, **kwargs)
         self.error = None
 
     def delivery_report(self, err, msg, obj=None):
@@ -49,46 +61,39 @@ class MyProducer(Producer):
 class MessageBusTest(unittest.TestCase):
     def __init__(self, methodName="runTest"):
         super().__init__(methodName)
-        pass
-        # self.username = 'username'
-        # self.password = 'password'
+        self.username = "username"
+        self.password = "password"
         self.schema_registry_url = "http://localhost:8081"
         self.broker = "localhost:9092"
         self.script_location = Path(__file__).absolute().parent.parent
         self.conf = {
-            # default config (producer and consumer)
-            # put librdkafka and/or confluent producer configuration in here
             "bootstrap.servers": self.broker,
-            # 'sasl.mechanism': "SCRAM-SHA-512",
-            # 'security.protocol': "SASL_PLAINTEXT",
-            # 'sasl.username': username,
-            # 'sasl.password': password,
         }
         # adminApi
         self.api = self._get_api()
         # create topics
-        self.topic_test_1 = f"dev-python-messagebus-test{random.randint(21, 30)}"
-        self.topic_test_2 = f"dev-python-messagebus-test{random.randint(31, 40)}"
+        self.topic_test_1 = f"dev-python-messagebus-test{random.randint(1, 10)}"
+        self.topic_test_2 = f"dev-python-messagebus-test{random.randint(11, 20)}"
         self.topics = [self.topic_test_1, self.topic_test_2]
         self.api.create_topics(self.topics)
         # create key and value schema
+        self.key_schema = self._get_key_schema()
         self.val_schema = self._get_val_schema()
         self.producer = self._get_producer()
         self.consumer = self._get_consumer()
 
     def test_workflow(self):
-        pass
         consume_thread = Thread(target=self.consumer.consume_auto, daemon=True)
         consume_thread.start()
         produce_result = self.producer.produce_async(
-            self.topic_test_1,
+            self.topic_test_2,
             {"name": "Johny", "age": 29},
+            str(uuid.uuid4()),
         )
         print("producer's produce_async result", produce_result)
         self.assertTrue(produce_result)
         while self.consumer.received_message is None:
             time.sleep(1)
-
         self.consumer.shutdown()
         consume_thread.join()
         print("consumer's received_message", self.consumer.received_message)
@@ -103,15 +108,12 @@ class MessageBusTest(unittest.TestCase):
             {
                 **self.conf,
                 **{
-                    # producer config
-                    # put librdkafka and/or confluent consumer configuration in here
-                    # and also schema registry configuration
                     "schema.registry.url": self.schema_registry_url,
-                    # to custom subject name strategy put this item (only for producer)
-                    "subject.name.strategy": record_subject_name_strategy,
+                    # "on_delivery": on_delivery_callback,  # you can use this item to catch the produce_sync callback
                 },
             },
             self.val_schema,
+            self.key_schema,
         )
 
     def _get_consumer(self) -> MyConsumer:
@@ -119,16 +121,14 @@ class MessageBusTest(unittest.TestCase):
             {
                 **self.conf,
                 **{
-                    # consumer config
-                    # put librdkafka and/or confluent consumer configuration in here
-                    # and also schema registry configuration
                     "auto.offset.reset": "earliest",
                     "group.id": "default",
                     "schema.registry.url": self.schema_registry_url,
                 },
             },
             self.val_schema,
-            [self.topic_test_1],
+            [self.topic_test_2],
+            self.key_schema,
         )
 
     def _get_api(self) -> AdminApi:
@@ -136,6 +136,11 @@ class MessageBusTest(unittest.TestCase):
         for a in api.list_topics():
             print("Topic {}".format(a))
         return api
+
+    def _get_key_schema(self) -> str:
+        with open(f"{self.script_location}/schemas/key.avsc", "r") as f:
+            key_schema = f.read()
+        return key_schema
 
     def _get_val_schema(self) -> str:
         with open(f"{self.script_location}/schemas/johny_schema.avsc", "r") as f:
