@@ -28,7 +28,6 @@ class Consumer(Base):
     ):
         super().__init__(logger)
 
-        key_schema_str = ""
         with open(
             f"{Path(__file__).absolute().parent}/schemas/message_header.avsc", "r"
         ) as f:

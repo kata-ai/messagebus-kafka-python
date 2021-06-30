@@ -5,8 +5,7 @@ Defines Producer class which exposes interface for various producer functions
 import traceback
 
 from pathlib import Path
-from confluent_kafka import avro, SerializingProducer
-from confluent_kafka.avro import AvroProducer
+from confluent_kafka import SerializingProducer
 from confluent_kafka.schema_registry import (
     SchemaRegistryClient,
     record_subject_name_strategy,
@@ -14,7 +13,6 @@ from confluent_kafka.schema_registry import (
 from confluent_kafka.schema_registry.avro import AvroSerializer
 from messagebus.base import Base
 from messagebus.messages.message_key import MessageKey
-from messagebus import __VERSION__ as version
 
 
 class Producer(Base):

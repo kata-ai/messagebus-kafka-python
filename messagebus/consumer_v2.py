@@ -3,13 +3,11 @@
 Defines AvroConsumer API class which exposes interface for various consumer functions
 """
 import importlib
+from pathlib import Path
 
-from confluent_kafka import avro, DeserializingConsumer
+from confluent_kafka import avro
 from confluent_kafka.avro import AvroConsumer, SerializerError
 from confluent_kafka.cimpl import KafkaError
-from confluent_kafka.schema_registry import SchemaRegistryClient
-from confluent_kafka.schema_registry.avro import AvroDeserializer
-
 
 from messagebus.base import Base
 
@@ -23,13 +21,16 @@ class Consumer(Base):
     def __init__(
         self,
         conf: dict,
-        key_schema_str: str,
         value_schema_str: str,
         topics: str,
+        key_schema_str=None,
         batch_size=5,
         logger=None,
     ):
         super().__init__(logger)
+        if not key_schema_str:
+            with open(f"{Path(__file__).absolute().parent}/schemas/key.avsc", "r") as f:
+                key_schema_str = f.read()
 
         reader_key_schema = avro.loads(key_schema_str)
         reader_value_schema = avro.loads(value_schema_str)

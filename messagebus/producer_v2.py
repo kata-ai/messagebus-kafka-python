@@ -3,16 +3,16 @@
 Defines Producer class which exposes interface for various producer functions
 """
 import traceback
+from pathlib import Path
 
-from confluent_kafka import avro, SerializingProducer
-from confluent_kafka.avro import AvroProducer
+from confluent_kafka import SerializingProducer
 from confluent_kafka.schema_registry import (
     SchemaRegistryClient,
+    topic_subject_name_strategy,
 )
 from messagebus.base import Base
 from messagebus.messages.message_header import MessageHeader
 from confluent_kafka.schema_registry.avro import AvroSerializer
-from messagebus import __VERSION__ as version
 
 
 class Producer(Base):
@@ -21,8 +21,10 @@ class Producer(Base):
     It is expected that the users would extend this class and override on_delivery function.
     """
 
+    use_default_key_schema = False
+
     def __init__(
-        self, conf, key_schema_str: str, value_schema_str: str, logger=None, **kwargs
+        self, conf, value_schema_str: str, key_schema_str=None, logger=None, **kwargs
     ):
         """
         Initialize the Producer
@@ -33,51 +35,50 @@ class Producer(Base):
         :param value_schema: loaded avro schema_str for the value
         """
         super().__init__(logger)
+        
+        if not key_schema_str:
+            self.use_default_key_schema = True
 
-        default_key_schema = avro.loads(key_schema_str)
-        default_value_schema = avro.loads(value_schema_str)
+            with open(f"{Path(__file__).absolute().parent}/schemas/key.avsc", "r") as f:
+                key_schema_str = f.read()
 
-        if "subject.name.strategy" in conf:
-            schema_registry_client = SchemaRegistryClient(
-                {
-                    "url": conf["schema.registry.url"],
-                }
-            )
+        if not ("subject.name.strategy" in conf):
+            conf["subject.name.strategy"] = topic_subject_name_strategy
 
-            key_serializer = AvroSerializer(
-                schema_str=key_schema_str,
-                schema_registry_client=schema_registry_client,
-                conf={
-                    "auto.register.schemas": True,
-                    "subject.name.strategy": conf["subject.name.strategy"],
-                },
-            )
-
-            value_serializer = AvroSerializer(
-                schema_str=value_schema_str,
-                schema_registry_client=schema_registry_client,
-                conf={
-                    "auto.register.schemas": True,
-                    "subject.name.strategy": conf["subject.name.strategy"],
-                },
-            )
-
-            serializer_conf = {
-                "key.serializer": key_serializer,
-                "value.serializer": value_serializer,
+        schema_registry_client = SchemaRegistryClient(
+            {
+                "url": conf["schema.registry.url"],
             }
+        )
 
-            del conf["schema.registry.url"]
-            del conf["subject.name.strategy"]
+        key_serializer = AvroSerializer(
+            schema_str=key_schema_str,
+            schema_registry_client=schema_registry_client,
+            conf={
+                "auto.register.schemas": True,
+                "subject.name.strategy": conf["subject.name.strategy"],
+            },
+        )
 
-            conf.update(serializer_conf)
-            self.producer = SerializingProducer(conf)
-        else:
-            self.producer = AvroProducer(
-                conf,
-                default_key_schema=default_key_schema,
-                default_value_schema=default_value_schema,
-            )
+        value_serializer = AvroSerializer(
+            schema_str=value_schema_str,
+            schema_registry_client=schema_registry_client,
+            conf={
+                "auto.register.schemas": True,
+                "subject.name.strategy": conf["subject.name.strategy"],
+            },
+        )
+
+        serializer_conf = {
+            "key.serializer": key_serializer,
+            "value.serializer": value_serializer,
+        }
+
+        del conf["schema.registry.url"]
+        del conf["subject.name.strategy"]
+
+        conf.update(serializer_conf)
+        self.producer = SerializingProducer(conf)
 
     def set_logger(self, logger):
         """
@@ -105,7 +106,7 @@ class Producer(Base):
         message_header = MessageHeader()
         return message_header.to_dict()
 
-    def produce_async(self, topic: str, value, key="default") -> bool:
+    def produce_async(self, topic: str, value, key=None) -> bool:
         """
         Produce records for a specific topic
         :param topic: topic to which messages are written to
@@ -121,11 +122,14 @@ class Producer(Base):
         try:
             # The message passed to the delivery callback will already be serialized.
             # To aid in debugging we provide the original object to the delivery callback.
+            headers = self.__message_header_generator()
             self.producer.produce(
                 topic=topic,
-                key=key,
+                key=headers["message_id"]
+                if self.use_default_key_schema or not key
+                else key,
                 value=value,
-                headers=self.__message_header_generator(),
+                headers=headers,
                 on_delivery=self.delivery_report,
             )
             # Serve on_delivery callbacks from previous asynchronous produce()
@@ -136,7 +140,7 @@ class Producer(Base):
             self.log_error("Invalid input, discarding record...{}".format(ex))
         return False
 
-    def produce_sync(self, topic: str, value, key="default") -> bool:
+    def produce_sync(self, topic: str, value, key=None) -> bool:
         """
         Produce records for a specific topic
         :param topic: topic to which messages are written to
@@ -149,11 +153,14 @@ class Producer(Base):
             self.log_debug("Producing record {} to topic {}.".format(value, topic))
 
             # Pass the message synchronously
+            headers = self.__message_header_generator()
             self.producer.produce(
                 topic=topic,
-                key=key,
+                key=headers["message_id"]
+                if self.use_default_key_schema or not key
+                else key,
                 value=value,
-                headers=self.__message_header_generator(),
+                headers=headers,
             )
             self.producer.flush()
             return True

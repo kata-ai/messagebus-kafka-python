@@ -13,14 +13,14 @@ class MyConsumer(Consumer):
     def __init__(
         self,
         conf: dict,
-        key_schema_str: str,
         value_schema_str: str,
         topics: str,
+        key_schema_str: str = None,
         batch_size: int = 5,
         logger=None,
     ):
         super().__init__(
-            conf, key_schema_str, value_schema_str, topics, batch_size, logger
+            conf, value_schema_str, topics, key_schema_str, batch_size, logger
         )
         self.received_message = None
 
@@ -34,9 +34,14 @@ class MyConsumer(Consumer):
 
 class MyProducer(Producer):
     def __init__(
-        self, conf, key_schema_str: str, value_schema_str: str, logger=None, **kwargs
+        self,
+        conf,
+        value_schema_str: str,
+        key_schema_str: str = None,
+        logger=None,
+        **kwargs,
     ):
-        super().__init__(conf, key_schema_str, value_schema_str, logger, **kwargs)
+        super().__init__(conf, value_schema_str, key_schema_str, logger, **kwargs)
         self.error = None
 
     def delivery_report(self, err, msg, obj=None):
@@ -104,8 +109,8 @@ class MessageBusTest(unittest.TestCase):
                     # "on_delivery": on_delivery_callback,  # you can use this item to catch the produce_sync callback
                 },
             },
-            self.key_schema,
             self.val_schema,
+            self.key_schema,
         )
 
     def _get_consumer(self) -> MyConsumer:
@@ -118,9 +123,9 @@ class MessageBusTest(unittest.TestCase):
                     "schema.registry.url": self.schema_registry_url,
                 },
             },
-            self.key_schema,
             self.val_schema,
             [self.topic_test_2],
+            self.key_schema,
         )
 
     def _get_api(self) -> AdminApi:
