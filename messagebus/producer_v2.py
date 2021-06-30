@@ -126,11 +126,12 @@ class Producer(Base):
                 raise KeyError("Key cannot be empty.")
 
             headers = self.__message_header_generator()
+            if self.use_default_key_schema:
+                key = headers["message_id"]
+
             self.producer.produce(
                 topic=topic,
-                key=headers["message_id"]
-                if self.use_default_key_schema or not key
-                else key,
+                key=key,
                 value=value,
                 headers=headers,
                 on_delivery=self.delivery_report,
@@ -160,11 +161,12 @@ class Producer(Base):
 
             # Pass the message synchronously
             headers = self.__message_header_generator()
+            if self.use_default_key_schema:
+                key = headers["message_id"]
+
             self.producer.produce(
                 topic=topic,
-                key=headers["message_id"]
-                if self.use_default_key_schema or not key
-                else key,
+                key=key,
                 value=value,
                 headers=headers,
             )
