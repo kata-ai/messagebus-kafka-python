@@ -127,8 +127,8 @@ The example is available in this [test](./messagebus/test/message_workflow_v2_te
 ```python
  class MyProducer(Producer):
 
-    def __init__(self, conf, key_schema_str: str, value_schema_str: str, logger=None, **kwargs):
-        super().__init__(conf, key_schema_str, value_schema_str, logger, **kwargs)
+    def __init__(self, conf, value_schema_str: str, key_schema_str: str = None, logger=None, **kwargs):
+        super().__init__(conf, value_schema_str, key_schema_str, logger, **kwargs)
         pass
 
     # kafka delivery callback handler
@@ -150,13 +150,13 @@ class MyConsumer(Consumer):
     def __init__(
         self,
         conf: dict,
-        key_schema_str: str,
         value_schema_str: str,
         topics: str,
+        key_schema_str: str = None,
         batch_size: int = 5,
         logger=None,
     ):
-        super().__init__(conf, key_schema_str, value_schema_str, topics, batch_size, logger)
+        super().__init__(conf, value_schema_str, topics, key_schema_str, batch_size, logger)
         pass
 
     # message handler overrider
@@ -172,8 +172,8 @@ producer = MyProducer(
         "bootstrap.servers": "localhost:9092",
         "schema.registry.url": "http://localhost:8081"
     },
-    "<string(json string) avro schema of key>",
     "<string(json string) avro schema of value>",
+    "<string(json string) avro schema of key>",
 )
 produce_result = producer.produce_async(
     "test_topic",
@@ -190,9 +190,9 @@ consumer = MyConsumer(
         "auto.offset.reset": "earliest",
         "group.id": "default",
     },
-    "<string(json string) avro schema of key>",
     "<string(json string) avro schema of value>",
     "test_topic",
+    "<string(json string) avro schema of key>",
 )
 consume_thread = Thread(target=consumer.consume_auto, daemon=True)
 consume_thread.start()
